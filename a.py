@@ -52,14 +52,14 @@ if uploaded_files:
         st.subheader(f"Annotate: {selected_image_name}")
         st.image(image, caption="Original Image", use_column_width=True)
 
-        # --- Drawable Canvas (With background image) ---
+        # --- Drawable Canvas (With background image converted to a NumPy array) ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
             fill_color="rgba(255, 165, 0, 0.3)",  # correct RGBA format
             stroke_width=2,
             stroke_color="black",
-            background_image=image,             # set the uploaded image as background
-            background_image_mode="FIT",          # scale the image to fit the canvas
+            background_image=np.array(image),       # convert PIL Image to NumPy array
+            background_image_mode="FIT",            # scale the image to fit the canvas
             height=height,
             width=width,
             drawing_mode="rect",
@@ -77,10 +77,20 @@ if uploaded_files:
                 for i, box in enumerate(bounding_boxes):
                     col1, col2 = st.columns([2, 1])
                     with col1:
-                        st.write(f"**Bounding Box {i+1}:** Coordinates: *(x: {int(box['left'])}, y: {int(box['top'])}, width: {int(box['width'])}, height: {int(box['height'])})*")
+                        st.write(
+                            f"**Bounding Box {i+1}:** Coordinates: *(x: {int(box['left'])}, y: {int(box['top'])}, width: {int(box['width'])}, height: {int(box['height'])})*"
+                        )
                     with col2:
                         label_choice = st.selectbox(f"Label for Box {i+1}", custom_labels or ["object"], key=f"label_{i}")
-                    assigned_annotations.append({"label": label_choice, "x": box["left"], "y": box["top"], "width": box["width"], "height": box["height"]})
+                    assigned_annotations.append(
+                        {
+                            "label": label_choice,
+                            "x": box["left"],
+                            "y": box["top"],
+                            "width": box["width"],
+                            "height": box["height"],
+                        }
+                    )
 
                 # --- Save Annotations ---
                 if st.button("Save Annotation"):
@@ -88,7 +98,7 @@ if uploaded_files:
                     json_path = os.path.join(ANNOTATIONS_DIR, f"{os.path.splitext(selected_image_name)[0]}.json")
                     with open(json_path, "w") as f:
                         json.dump(annotation_data, f, indent=4)
-                    
+
                     image.save(os.path.join(ANNOTATED_IMAGES_DIR, selected_image_name))
 
                     # Save YOLO format annotations
