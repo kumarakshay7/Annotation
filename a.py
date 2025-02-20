@@ -5,15 +5,29 @@ import numpy as np
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
 
-# --- Wrapper class to avoid ambiguous truth value errors ---
+# --- Updated Wrapper Class to Provide Height and Width ---
 class ArrayWrapper:
     def __init__(self, array):
         self.array = array
+        # Assuming the array shape is (height, width, channels)
+        if array.ndim >= 2:
+            self._height = array.shape[0]
+            self._width = array.shape[1]
+        else:
+            self._height = None
+            self._width = None
+
     def __bool__(self):
         return True
+
     def __getattr__(self, name):
-        # Delegate attribute access to the wrapped array.
+        # Provide height and width attributes for the canvas resizing function.
+        if name == "height":
+            return self._height
+        if name == "width":
+            return self._width
         return getattr(self.array, name)
+
     def __getitem__(self, key):
         return self.array[key]
 
@@ -62,7 +76,7 @@ if uploaded_files:
         st.subheader(f"Annotate: {selected_image_name}")
         st.image(image, caption="Original Image", use_column_width=True)
 
-        # Convert image to a NumPy array and wrap it to avoid ambiguous truth value checks
+        # Convert image to a NumPy array and wrap it
         image_array = np.asarray(image)
         wrapped_image = ArrayWrapper(image_array)
 
@@ -72,7 +86,7 @@ if uploaded_files:
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
-            background_image=wrapped_image,  # Use wrapped image
+            background_image=wrapped_image,  # Use the wrapped image with height/width
             update_streamlit=True,
             height=height,
             width=width,
@@ -116,10 +130,7 @@ if uploaded_files:
                     with open(txt_path, "w") as f:
                         for ann in assigned_annotations:
                             x, y, w, h = ann["x"], ann["y"], ann["width"], ann["height"]
-                            cx = (x + w / 2) / width
-                            cy = (y + h / 2) / height
-                            norm_w = w / width
-                            norm_h = h / height
+                            cx, cy, norm_w, norm_h = (x + w / 2) / width, (y + h / 2) / height, w / width, h / height
                             class_index = custom_labels.index(ann["label"]) if ann["label"] in custom_labels else 0
                             f.write(f"{class_index} {cx:.6f} {cy:.6f} {norm_w:.6f} {norm_h:.6f}\n")
 
