@@ -52,14 +52,12 @@ if uploaded_files:
         st.subheader(f"Annotate: {selected_image_name}")
         st.image(image, caption="Original Image", use_column_width=True)
 
-        # --- Drawable Canvas (FIX: Use PIL image directly) ---
+        # --- Drawable Canvas (Bypass background_image issue) ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
-            background_image=image,  # ✅ FIX: Use PIL Image
-            update_streamlit=True,
             height=height,
             width=width,
             drawing_mode="rect",
