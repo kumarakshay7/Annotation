@@ -48,17 +48,18 @@ if uploaded_files:
         image = Image.open(selected_file).convert("RGB")
         width, height = image.size
         st.subheader(f"Annotate: {selected_image_name}")
-        
-        # Convert PIL image to NumPy array for proper display
-        image_np = np.array(image)
+        st.image(image, caption="Original Image", use_column_width=True)
 
-        # --- Drawable Canvas (WORKING FIX) ---
+        # Convert Image to NumPy array for Canvas background
+        image_array = np.array(image)
+
+        # --- Drawable Canvas (Fixed Background Image Issue) ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
-            background_image=Image.fromarray(image_np),  # ✅ FIX: Convert back to PIL image
+            background_image=image_array,  # ✅ FIX: Set NumPy image as background
             update_streamlit=True,
             height=height,
             width=width,
