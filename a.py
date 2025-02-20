@@ -22,8 +22,9 @@ BASE_DIR = os.getcwd()
 ANNOTATED_IMAGES_DIR = os.path.join(BASE_DIR, "annotated_images")
 ANNOTATIONS_DIR = os.path.join(BASE_DIR, "annotations")
 
-os.makedirs(ANNOTATED_IMAGES_DIR, exist_ok=True)
-os.makedirs(ANNOTATIONS_DIR, exist_ok=True)
+for folder in [ANNOTATED_IMAGES_DIR, ANNOTATIONS_DIR]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 # --- Application Title ---
 st.title("Annotation Tool (LabelImg Replica)")
@@ -70,7 +71,10 @@ if uploaded_files:
 
     # If multiple images are uploaded, allow user to pick one
     image_names = [uploaded_file.name for uploaded_file in uploaded_files]
-    selected_image_name = st.selectbox("Select an image to annotate", options=image_names)
+    selected_image_name = st.selectbox(
+        "Select an image to annotate",
+        options=image_names
+    )
 
     # Retrieve the selected file object
     selected_file = next((f for f in uploaded_files if f.name == selected_image_name), None)
@@ -149,7 +153,7 @@ if uploaded_files:
                     # Save a copy of the original image in the annotated_images folder
                     image.save(os.path.join(ANNOTATED_IMAGES_DIR, selected_image_name))
                     
-                    # --- Save TXT Annotation File ---
+                    # --- New Function: Save TXT Annotation File ---
                     txt_annotation_file = os.path.join(ANNOTATIONS_DIR, f"{base_filename}.txt")
                     with open(txt_annotation_file, "w") as f:
                         if annotation_format == "YOLO":
