@@ -4,8 +4,6 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
-import base64
-from io import BytesIO
 
 # --- Setup directories for saving data ---
 BASE_DIR = os.getcwd()
@@ -50,14 +48,18 @@ if uploaded_files:
         image = Image.open(selected_file).convert("RGB")
         width, height = image.size
         st.subheader(f"Annotate: {selected_image_name}")
-        st.image(image, caption="Original Image", use_column_width=True)
+        
+        # Convert PIL image to NumPy array for proper display
+        image_np = np.array(image)
 
-        # --- Drawable Canvas (Bypass background_image issue) ---
+        # --- Drawable Canvas (WORKING FIX) ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
+            background_image=Image.fromarray(image_np),  # ✅ FIX: Convert back to PIL image
+            update_streamlit=True,
             height=height,
             width=width,
             drawing_mode="rect",
