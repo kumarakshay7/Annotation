@@ -17,6 +17,9 @@ if not hasattr(st_image, "image_to_url"):
         return f"data:image/png;base64,{img_str}"
     st_image.image_to_url = image_to_url
 
+# Now import st_canvas after patching st_image
+from streamlit_drawable_canvas import st_canvas
+
 # --- Setup directories for saving data ---
 BASE_DIR = os.getcwd()
 ANNOTATED_IMAGES_DIR = os.path.join(BASE_DIR, "annotated_images")
