@@ -1,9 +1,9 @@
 import streamlit as st
-import streamlit.elements.image as st_image
-from io import BytesIO
 import base64
+from io import BytesIO
 
-# --- Patch for streamlit_drawable_canvas if using new Streamlit versions ---
+# Patch st_image.image_to_url before any other imports use it.
+import streamlit.elements.image as st_image
 if not hasattr(st_image, "image_to_url"):
     def image_to_url(image):
         buffered = BytesIO()
@@ -11,8 +11,9 @@ if not hasattr(st_image, "image_to_url"):
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         return f"data:image/png;base64,{img_str}"
     st_image.image_to_url = image_to_url
+    st.write("Patched st_image.image_to_url")  # Optional: for debugging
 
-# Now import st_canvas after patching st_image.image_to_url
+# Now import st_canvas AFTER patching st_image.image_to_url.
 from streamlit_drawable_canvas import st_canvas
 
 # Rest of your imports and code...
