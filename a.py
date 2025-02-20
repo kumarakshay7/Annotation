@@ -7,10 +7,6 @@ from streamlit_drawable_canvas import st_canvas
 import base64
 from io import BytesIO
 
-# --- Convert PIL image to NumPy array ---
-def pil_to_numpy(image):
-    return np.array(image)
-
 # --- Setup directories for saving data ---
 BASE_DIR = os.getcwd()
 ANNOTATED_IMAGES_DIR = os.path.join(BASE_DIR, "annotated_images")
@@ -56,16 +52,13 @@ if uploaded_files:
         st.subheader(f"Annotate: {selected_image_name}")
         st.image(image, caption="Original Image", use_column_width=True)
 
-        # Convert PIL image to NumPy array
-        image_np = pil_to_numpy(image)
-
-        # --- Drawable Canvas ---
+        # --- Drawable Canvas (FIX: Use PIL image directly) ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
-            background_image=image_np,  # FIX: Passing NumPy array instead of PIL image
+            background_image=image,  # ✅ FIX: Use PIL Image
             update_streamlit=True,
             height=height,
             width=width,
@@ -74,9 +67,8 @@ if uploaded_files:
         )
 
         # --- Process Annotations ---
-        if canvas_result.json_data:
-            objects = canvas_result.json_data.get("objects", [])
-            bounding_boxes = [obj for obj in objects if obj.get("type") == "rect"]
+        if canvas_result.json_data and "objects" in canvas_result.json_data:
+            bounding_boxes = [obj for obj in canvas_result.json_data["objects"] if obj.get("type") == "rect"]
 
             if bounding_boxes:
                 st.markdown("#### Assign Labels to Each Bounding Box")
@@ -111,3 +103,5 @@ if uploaded_files:
                     st.success("Annotation saved successfully! JSON and TXT files created.")
             else:
                 st.info("Draw at least one bounding box to save annotations.")
+        else:
+            st.info("Use the drawing tool above to add bounding boxes.")
