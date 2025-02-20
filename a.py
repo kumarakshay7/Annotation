@@ -105,7 +105,39 @@ if uploaded_files:
                     with col2:
                         label_choice = st.selectbox(f"Label for Box {i+1}", custom_labels or ["object"], key=f"label_{i}")
                     assigned_annotations.append({"label": label_choice, "x": box["left"], "y": box["top"], "width": box["width"], "height": box["height"]})
+ # --- Process Canvas JSON Data ---
+        if canvas_result.json_data is not None:
+            # Filter out only the drawn rectangles (bounding boxes)
+            objects = canvas_result.json_data.get("objects", [])
+            bounding_boxes = [obj for obj in objects if obj.get("type") == "rect"]
 
+            if bounding_boxes:
+                st.markdown("#### Assign Labels to Each Bounding Box")
+                assigned_annotations = []
+                # For each bounding box, allow the user to assign a label
+                for i, box in enumerate(bounding_boxes):
+                    col1, col2 = st.columns([2, 1])
+                    with col1:
+                        st.write(f"**Bounding Box {i+1}:**")
+                        st.write(
+                            f"Coordinates: *(x: {int(box.get('left', 0))}, y: {int(box.get('top', 0))}, "
+                            f"width: {int(box.get('width', 0))}, height: {int(box.get('height', 0))})*"
+                        )
+                    with col2:
+                        # If no custom labels provided, use a default value.
+                        default_label = custom_labels[0] if custom_labels else "object"
+                        label_choice = st.selectbox(
+                            f"Select label for box {i+1}",
+                            options=custom_labels if custom_labels else [default_label],
+                            key=f"label_{i}"
+                        )
+                    assigned_annotations.append({
+                        "label": label_choice,
+                        "x": box.get("left", 0),
+                        "y": box.get("top", 0),
+                        "width": box.get("width", 0),
+                        "height": box.get("height", 0)
+                    })
                 # --- Save Annotations ---
                 if st.button("Save Annotation"):
                     annotation_data = {"image_name": selected_image_name, "annotations": assigned_annotations}
