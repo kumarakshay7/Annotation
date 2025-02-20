@@ -50,14 +50,16 @@ if uploaded_files:
         image = Image.open(selected_file).convert("RGB")
         width, height = image.size
         st.subheader(f"Annotate: {selected_image_name}")
-        
-        # --- Drawable Canvas with PIL Image as Background ---
+        st.image(image, caption="Original Image", use_column_width=True)
+
+        # --- Drawable Canvas (With background image) ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
-            background_image=image,  # Pass the PIL image directly
-            fill_color="rgba(255, 165, 0, 0.3)",  # Valid RGBA format
+            fill_color="rgba(255, 165, 0, 0.3)",  # correct RGBA format
             stroke_width=2,
             stroke_color="black",
+            background_image=image,             # set the uploaded image as background
+            background_image_mode="FIT",          # scale the image to fit the canvas
             height=height,
             width=width,
             drawing_mode="rect",
@@ -94,10 +96,7 @@ if uploaded_files:
                     with open(txt_path, "w") as f:
                         for ann in assigned_annotations:
                             x, y, w, h = ann["x"], ann["y"], ann["width"], ann["height"]
-                            cx = (x + w / 2) / width
-                            cy = (y + h / 2) / height
-                            norm_w = w / width
-                            norm_h = h / height
+                            cx, cy, norm_w, norm_h = (x + w / 2) / width, (y + h / 2) / height, w / width, h / height
                             class_index = custom_labels.index(ann["label"]) if ann["label"] in custom_labels else 0
                             f.write(f"{class_index} {cx:.6f} {cy:.6f} {norm_w:.6f} {norm_h:.6f}\n")
 
