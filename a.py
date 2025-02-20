@@ -51,11 +51,11 @@ if uploaded_files:
         width, height = image.size
         st.subheader(f"Annotate: {selected_image_name}")
         
-        # --- Drawable Canvas with Image as Background ---
+        # --- Drawable Canvas with PIL Image as Background ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
-            background_image=np.array(image),  # Set the uploaded image as the canvas background
-            fill_color="rgba(255, 165, 0, 0.3)",  # Fixed the RGBA format (alpha should be between 0 and 1)
+            background_image=image,  # Pass the PIL image directly
+            fill_color="rgba(255, 165, 0, 0.3)",  # Valid RGBA format
             stroke_width=2,
             stroke_color="black",
             height=height,
