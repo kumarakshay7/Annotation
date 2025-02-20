@@ -7,7 +7,7 @@ from streamlit_drawable_canvas import st_canvas
 import base64
 from io import BytesIO
 
-# --- Patch for streamlit_drawable_canvas if using new Streamlit versions ---
+# --- Patch for streamlit_drawable_canvas for newer Streamlit versions ---
 import streamlit.elements.image as st_image
 if not hasattr(st_image, "image_to_url"):
     def image_to_url(image):
@@ -17,7 +17,7 @@ if not hasattr(st_image, "image_to_url"):
         return f"data:image/png;base64,{img_str}"
     st_image.image_to_url = image_to_url
 
-# Now import st_canvas after patching st_image
+# --- Now import st_canvas after patching ---
 from streamlit_drawable_canvas import st_canvas
 
 # --- Setup directories for saving data ---
