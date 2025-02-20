@@ -5,6 +5,18 @@ import numpy as np
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
 
+# --- Wrapper class to avoid ambiguous truth value errors ---
+class ArrayWrapper:
+    def __init__(self, array):
+        self.array = array
+    def __bool__(self):
+        return True
+    def __getattr__(self, name):
+        # Delegate attribute access to the wrapped array.
+        return getattr(self.array, name)
+    def __getitem__(self, key):
+        return self.array[key]
+
 # --- Setup directories for saving data ---
 BASE_DIR = os.getcwd()
 ANNOTATED_IMAGES_DIR = os.path.join(BASE_DIR, "annotated_images")
@@ -50,8 +62,9 @@ if uploaded_files:
         st.subheader(f"Annotate: {selected_image_name}")
         st.image(image, caption="Original Image", use_column_width=True)
 
-        # ✅ Convert Image to NumPy Array before passing to st_canvas
+        # Convert image to a NumPy array and wrap it to avoid ambiguous truth value checks
         image_array = np.asarray(image)
+        wrapped_image = ArrayWrapper(image_array)
 
         # --- Drawable Canvas ---
         st.markdown("### Draw Bounding Boxes on the Image")
@@ -59,7 +72,7 @@ if uploaded_files:
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
-            background_image=image_array,  # ✅ FIX: Use NumPy array format
+            background_image=wrapped_image,  # Use wrapped image
             update_streamlit=True,
             height=height,
             width=width,
@@ -81,7 +94,13 @@ if uploaded_files:
                         st.write(f"**Bounding Box {i+1}:** Coordinates: *(x: {int(box['left'])}, y: {int(box['top'])}, width: {int(box['width'])}, height: {int(box['height'])})*")
                     with col2:
                         label_choice = st.selectbox(f"Label for Box {i+1}", custom_labels or ["object"], key=f"label_{i}")
-                    assigned_annotations.append({"label": label_choice, "x": box["left"], "y": box["top"], "width": box["width"], "height": box["height"]})
+                    assigned_annotations.append({
+                        "label": label_choice,
+                        "x": box["left"],
+                        "y": box["top"],
+                        "width": box["width"],
+                        "height": box["height"]
+                    })
 
                 # --- Save Annotations ---
                 if st.button("Save Annotation"):
@@ -97,7 +116,10 @@ if uploaded_files:
                     with open(txt_path, "w") as f:
                         for ann in assigned_annotations:
                             x, y, w, h = ann["x"], ann["y"], ann["width"], ann["height"]
-                            cx, cy, norm_w, norm_h = (x + w / 2) / width, (y + h / 2) / height, w / width, h / height
+                            cx = (x + w / 2) / width
+                            cy = (y + h / 2) / height
+                            norm_w = w / width
+                            norm_h = h / height
                             class_index = custom_labels.index(ann["label"]) if ann["label"] in custom_labels else 0
                             f.write(f"{class_index} {cx:.6f} {cy:.6f} {norm_w:.6f} {norm_h:.6f}\n")
 
