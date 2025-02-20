@@ -14,10 +14,13 @@ if not hasattr(st_image, "image_to_url"):
 
 # Now import st_canvas after patching st_image.image_to_url
 from streamlit_drawable_canvas import st_canvas
+
+# Rest of your imports and code...
 import os
 import json
 import numpy as np
 from PIL import Image
+
 
 # --- Setup directories for saving data ---
 BASE_DIR = os.getcwd()
