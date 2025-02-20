@@ -161,4 +161,8 @@ if uploaded_files:
                                 )
                     st.success("Annotation saved successfully! JSON and TXT files created.")
             else:
-      
+                st.info("Draw one or more bounding boxes on the image to begin annotation.")
+        else:
+            st.info("Use the drawing tool above to add bounding boxes.")
+else:
+    st.info("Upload images from the sidebar to start annotating.")
