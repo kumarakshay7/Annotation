@@ -1,4 +1,5 @@
-streamlit
-numpy
-pillow
-streamlit-drawable-canvas
+streamlit>=1.0.0
+streamlit_drawable_canvas>=0.8.0
+numpy>=1.19.0
+Pillow>=8.0.0
+
