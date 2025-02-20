@@ -50,8 +50,8 @@ if uploaded_files:
         st.subheader(f"Annotate: {selected_image_name}")
         st.image(image, caption="Original Image", use_column_width=True)
 
-        # ✅ Convert Image to NumPy Array
-        image_array = np.array(image)
+        # ✅ Convert Image to NumPy Array before passing to st_canvas
+        image_array = np.asarray(image)
 
         # --- Drawable Canvas ---
         st.markdown("### Draw Bounding Boxes on the Image")
@@ -59,7 +59,7 @@ if uploaded_files:
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
-            background_image=image_array,  # ✅ FIX: Set Image as Background
+            background_image=image_array,  # ✅ FIX: Use NumPy array format
             update_streamlit=True,
             height=height,
             width=width,
