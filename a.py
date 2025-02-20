@@ -4,6 +4,8 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
+import base64
+from io import BytesIO
 
 # --- Setup directories for saving data ---
 BASE_DIR = os.getcwd()
@@ -37,6 +39,13 @@ if st.sidebar.button("Save Labels"):
         f.write("\n".join(custom_labels))
     st.sidebar.success("Labels saved successfully!")
 
+# Function to Convert Image to Base64
+def pil_to_base64(image):
+    """Convert a PIL image to base64 encoding."""
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
 # --- Main Panel: Image Annotation ---
 if uploaded_files:
     st.header("Annotate Images")
@@ -50,16 +59,30 @@ if uploaded_files:
         st.subheader(f"Annotate: {selected_image_name}")
         st.image(image, caption="Original Image", use_column_width=True)
 
-        # Convert Image to NumPy array for Canvas background
-        image_array = np.array(image)
+        # Convert Image to Base64 for Background
+        img_base64 = pil_to_base64(image)
 
-        # --- Drawable Canvas (Fixed Background Image Issue) ---
+        # Display Image as Background with HTML
+        st.markdown(
+            f"""
+            <style>
+                .stCanvas {{
+                    background-image: url("data:image/png;base64,{img_base64}");
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # --- Drawable Canvas ---
         st.markdown("### Draw Bounding Boxes on the Image")
         canvas_result = st_canvas(
             fill_color="rgba(255, 165, 0.3, 0.3)",
             stroke_width=2,
             stroke_color="black",
-            background_image=image_array,  # ✅ FIX: Set NumPy image as background
+            background_color="white",  # Keep background color white
             update_streamlit=True,
             height=height,
             width=width,
